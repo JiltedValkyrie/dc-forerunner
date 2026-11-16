@@ -100,7 +100,7 @@ The menu offers two values for OBJECT DETAIL: **DYNAMIC** and **LOW** (`video_ob
 | Character LOD tier change | no fade: hard swap | section 1, rule 6; `src/level.c` ENEMY HIDE comment ("LOD tiers swap hard") |
 | Mesh swap (any) | no fade | owner rule (memory note 2026-11-15) |
 
-Open point: the prop rule (the far-far crossfade with its near mesh) is a fade between two LOD tiers. Rule 6 says no fade between tiers. The rule as written is for characters. Ask the owner before you apply rule 6 to props.
+Owner ruling (2026-11-15): props keep the far-far crossfade with their near mesh. Rule 6 (no fade between tiers) applies to characters only.
 
 ## 6. Enemy rules in the campaign (summary)
 
@@ -188,7 +188,7 @@ Lesson: a card saves triangles, but in a cutscene with many large objects the me
 
 ## 12. Open items and checks
 
-- Prop crossfade versus rule 6 (section 5): ask the owner.
+- Prop crossfade: owner ruled 2026-11-15, props keep it (section 5).
 - The Jackal far head is said to switch at 50 px in `docs/PERF_NOTES.md` (the name `CHARACTER_FAR_HEAD` is not in `src/`). Not verified in code. Mark it as a note until a source line is found.
 - `docs/GAME_GUIDE.md` (the presets table, the "Enemies far away" row) still says "past 41 m". The code uses 80 wu (244 m) for idle enemies at every setting. Fix the guide.
 - The enemy-hide comment in `src/level.c` (ENEMY HIDE AND SLEEP) still says "not at OBJECT DISTANCE FAR". The #265 text in the same comment says the reach no longer follows OBJECT DISTANCE. Read both before you copy the rule.
