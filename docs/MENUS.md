@@ -92,7 +92,7 @@ Example, PERFORMANCE and BALANCED on the rows that matter for the look (`src/men
 
 Rule (`AGENTS.md` in dc-halo): when a preset value or a side effect changes, update the menu note, `docs/GAME_GUIDE.md` (the "Video settings" preset table) and `docs/CONTROLS.md` in the same change. `menu.c video_presets` and `video_apply_options` must agree.
 
-Stale text found on 2026-11-15: `docs/GAME_GUIDE.md` lines 30 and 42 still say the game has four presets (FIDELITY and XTREME included). The code has two. Fix the guide before anyone copies it.
+Guide status (2026-11-15): `docs/GAME_GUIDE.md` and `docs/CONTROLS.md` still describe four presets in places. The code has two. The fix is in progress in dc-halo. The guide must list two presets: PERFORMANCE and BALANCED.
 
 Generic: two presets to start: a Performance preset and a Balanced default. Add a third only with an owner decision and a cost line (RAM, VRAM, ms).
 
@@ -180,11 +180,134 @@ Generic: keep one English-keyed table for menu text and one for dialogue or stor
 
 1. Copy the page map (section 2). Rename the pages; keep the order.
 2. Set up the row types in section 4 once, then reuse them.
-3. Write the presets as full rows (section 5). Two presets to start.
+3. Write the presets as full rows (sections 5 and 10). Two presets to start: PERFORMANCE and BALANCED (default).
 4. Write every note to section 6. Count the characters.
 5. Add the debug gate (section 7), the session-only sliders and the serial rows.
 6. Put every menu string in the translation table at the call site (section 8).
 7. Boot test: each row changes the game, each note matches its number on screen, and the preset label reads CUSTOM after one change.
+8. Fill the defaults table (section 11): every settings row, the VIDEO values that no preset sets, RESTORE ALL DEFAULTS, and every DEBUG row.
+
+## 10. Video presets, full table
+
+Labels: **CODE** = read from the dc-halo source on 2026-11-15. **UNVERIFIED** = no number in the dc-halo docs; the cost is not measured here.
+
+Source: `src/menu.c` `video_presets` (lines 400 to 407) holds the rows. `src/menu.h` lines 582 to 588 hold the struct `video_preset_t`: 22 stored fields, plus 3 FX fields in an FX build. `video_apply_preset` (`src/menu.c` lines 455 to 487) writes them into the live settings. `video_preset_match` (`src/menu.c` lines 425 to 447) reads them back. Menu rows and values come from `src/menu_draw.c` (value arrays at lines 786 to 840; row cases at lines 841 to 1150). The first number in a preset cell is the stored value. The text after the colon is what the menu shows.
+
+**Proven baseline.** The values below are the dc-halo values that have been booted and proven. Use the same values in this project. Rename the rows to this game's names.
+
+Preset values are the same for all three versions. A preset is applied with `video_apply_preset`, so anything not in this table is not changed by a preset.
+
+| Setting (`video_t` field) | Menu row | PERFORMANCE | BALANCED (default) | Player-facing value | Cost | Source |
+|---|---|---|---|---|---|---|
+| `res_index` | RESOLUTION | 1: 640x480 | 1: 640x480 | `< 640x480 >` | No cost in a preset. 768x480 WIDE (not a preset value) loses about a quarter of texture RAM (menu.h comment, WIDE). | `menu.c` 401 to 404; `menu.h` 376 to 377 |
+| `draw_distance` | DRAW DISTANCE | 15: DYNAMIC (STRONG) | 16: DYNAMIC | `< DYNAMIC (STRONG) >`, 30 to 90 %, 50 % in a vehicle / `< DYNAMIC >`, 50 to 90 % | UNVERIFIED (the rule holds 30 frames a second; no ms in the docs) | `menu.c` 401 to 402; `menu.h` 388 to 389; `menu_draw.c` 894 to 905 |
+| `object_detail` | OBJECT DETAIL | 5: DYNAMIC | 5: DYNAMIC | `< DYNAMIC >`. Note: the enemy you aim at is shown in full detail | UNVERIFIED | `menu.h` 420 to 421; `menu_draw.c` 931 to 933 |
+| `particles` | PARTICLES | 0: cap 32 | 2: cap 96 | `< 32 >` / `< 96 >` | Scorch and blood marks: 24 / 8 s / 2 s (Performance) and 64 / 22 s / 5 s (Balanced), `docs/GAME_GUIDE.md` table. No ms in the docs. | `menu.c` 187; `menu_draw.c` 1013 to 1022 |
+| `flash_objects` | none (no row) | 1: ON | 1: ON | `ON` on every preset; no setting | "zero frame time measured" (code comment) | `menu.c` 824; `menu.c` 401 to 404 |
+| `detail_distance` | DETAIL DISTANCE | 3: 9 wu | 5: 16 wu | `< 27 m >` / `< 49 m >` | UNVERIFIED | `menu.c` 188; `menu.h` 445 to 446; `menu_draw.c` 906 to 910 |
+| `bump_distance` | none (no row; a10 monitors screen only) | 0: OFF | 1: 3 wu | 9 m (Balanced); not shown in any menu row | UNVERIFIED. Not part of the preset match. | `menu.h` 101, 449; `menu.c` 371 |
+| `object_distance` | OBJECT DISTANCE | 1: 16 wu | 1: 16 wu | `< 49 m >` | UNVERIFIED | `menu.c` 213; `menu_draw.c` 911 to 915 |
+| `far_props` | FAR PROPS | 1: ON | 1: ON | `ON`. Note: trees and rocks stay to 152 m; next load | Loads the far-far pak files. Extra RAM not measured in the docs (UNVERIFIED). | `menu.h` (`far_props` comment); `menu_draw.c` 928 to 930 |
+| `reflection_environment` | WALL + GLASS SHINE | 0: OFF | 4: LOW | `< OFF >` / `< LOW >` (LOW: shine on glass only) | UNVERIFIED | `menu.c` 402 to 404; `menu_draw.c` 802 to 807, 1001 to 1003 |
+| `reflection_vehicles` | VEHICLE SHINE | 0: OFF | 1: CHROME, YOURS | `< OFF >` / `< CHROME, YOURS >` | UNVERIFIED | `menu.c` 402 to 404; `menu_draw.c` 808 to 814, 1007 to 1009 |
+| `reflection_armour` | CHARACTER SHINE | 1: LIGHT | 2: FINER, FOES TOO | `< LIGHT >` / `< FINER, FOES TOO >` | UNVERIFIED | `menu.c` 401 to 404; `menu_draw.c` 816 to 822, 1010 to 1012 |
+| `object_lighting` | OBJECT LIGHTING | 1: SIMPLE | 3: FULL | `< SIMPLE >` / `< FULL >`. FULL note: lamps and gunfire light characters and walls. Uses more CPU. | "Uses more CPU" (menu note). No ms in the docs (UNVERIFIED). | `menu.h` 474 to 476; `menu_draw.c` 786 to 840 (`lighting`, `lighting_notes`) |
+| `object_shadows` | OBJECT SHADOWS | 4: FAIRY | 10: FOGGY HILL (shown as ROCKFORT (LOW)) | `< FAIRY >` / `< ROCKFORT (LOW) >` | No VRAM, no modifier list (code comment on the Balanced shadow default) | `menu.h` 490, 511, 517 to 518; `menu_draw.c` 786 to 840 (`shadow_names`), 940 to 962 |
+| `reflection_distance` | REFLECTION DISTANCE | 0: 6 wu | 1: 7.2 wu | `< 18 m >` / `< 22 m >` | UNVERIFIED | `menu.c` 372; `menu_draw.c` 1004 to 1006 |
+| `anti_aliasing` | ANTI-ALIASING | 0: OFF | 1: 2X | `< OFF >` / `< 2X >` | About 14 KB of texture RAM for 2X at boot (`docs/PERF_NOTES.md` line 983, a boot figure). 2X doubles the PVR tile width (`docs/PERF_NOTES.md` line 884). | `menu.h` 558 to 559; `menu_draw.c` 1146 to 1148 |
+| `armour_detail` | ARMOUR DETAIL | 0: OFF | 1: ON | `OFF` / `ON` | UNVERIFIED | `menu_draw.c` 963 to 965 |
+| `vehicle_particles` | VEHICLE PARTICLES | 2: 50 % | 2: 50 % | `< 50% >` | Share of OpenCE's particle count. No ms in the docs. | `menu.c` 186; `menu.h` 439, 361; `menu_draw.c` 1126 to 1129 |
+| `cutscene_detail` | CUTSCENE DETAIL | 1: MEDIUM | 1: MEDIUM (the Chief alone is HIGH within about 15 m of the camera; see `docs/GAME_GUIDE.md`) | `< MEDIUM >` | UNVERIFIED | `menu.h` 431; `menu_draw.c` 934 to 936 |
+| `shader_water` | WATER RIPPLES | 0: OFF | 1: 25 % | `< OFF >` / `< 25% >` | UNVERIFIED | `menu.h` 350, 362; `menu_draw.c` 971 to 975 |
+| `shader_mip_bias` | MIP BIAS (test images only) | 1: 0.75 | 1: 0.75 | `< 0.75 >` in a test image; a release image shows no row | None | `menu.h` (`shader_mip_bias` comment); `menu_draw.c` 997 to 1000 |
+| `eye_adapt` | EYE ADAPT (campaign only) | 0: OFF | 1: ON | `OFF` / `ON` | None in the docs | `menu.h` 148; `menu_draw.c` 920 to 927 |
+| `fx_bloom_on` | BLOOM (FX build only) | 0: OFF | 0: OFF | `OFF` | UNVERIFIED | `menu.h` (PVR_FX comment); `menu_draw.c` 1035 |
+| `fx_rays_on` | GODRAYS (FX build only) | 0: OFF | 0: OFF | `OFF` | UNVERIFIED | `menu.h` (PVR_FX comment); `menu_draw.c` 1036 |
+| `fx_lens_off` | CAMERA VIGNETTE | 1: held OFF | 0: the player's choice (ON by default) | `OFF` on Performance (turning it on reads CUSTOM) / `ON` by default on Balanced | None | `menu.c` 483 (`video_apply_preset`); `menu.c` 532 (`video_defaults`); `menu_draw.c` 1037 |
+| `campaign_fov` | FIELD OF VIEW | 60 degrees (`video_preset_fov`) | 60 degrees | `< 60 DEG >` | None in the docs | `menu.h` 354; `menu_draw.c` 864 to 867 |
+
+GRAIN is not a preset field. The player's choice holds on every preset (`menu.c` 483 comment; `menu.c` 532).
+
+## 11. Defaults for every setting (CODE)
+
+Start point for a new project. The values are the dc-halo values on 2026-11-15. Every value is a default that the player can change, unless the table says otherwise.
+
+### 11a. Settings page rows (SETTINGS)
+
+Row labels: `src/menu_draw.c` line 3557. Restore behaviour: `src/menu.c` lines 31 to 39 (`defaults`), 155 to 162 (`controls_defaults`), 1021 to 1031 (`video_restore`), 1506 to 1525 (the RESTORE ALL DEFAULTS confirm).
+
+| Row | Default | Steps | RESTORE ALL DEFAULTS | Source |
+|---|---|---|---|---|
+| LANGUAGE | English (`LANG_EN`, code 0) | the offered languages; LEFT / RIGHT / A step and wrap. Shown only past English and off a level | Kept (not reset) | `src/lang.h` line 14; `src/menu.c` line 48 (`settings_shown`); `src/menu_draw.c` line 3581 |
+| SUBTITLES | FOLLOW (ON past English, OFF in English) | FOLLOW / OFF / ON | Back to FOLLOW | `src/menu.h` line 284; `src/menu.c` line 37 |
+| CONTROLS | Scheme SOUTHPAW (STICK LOOKS, `SCHEME_FACE_MOVE`); invert Y OFF; look speed 5 (range 1 to 10); fishing rod OFF; rumble 75 % (index 3) | Each per row; rumble OFF, 25, 50, 75, 100, 125, 150 % | Back to these; every scheme's button map reset | `src/controls.h` line 30; `src/menu.c` lines 155 to 162, 788; `src/menu.h` lines 873 to 874 |
+| VIDEO | BALANCED preset, plus the values in 11b | The five tabs (DISPLAY, CAMERA, DISTANCE, OBJECTS, EFFECTS); rows in `video_tab_rows` | Balanced and the 11b values. Not on a run (the arena's video stays fixed). | `src/menu.c` lines 522 to 532 (`video_defaults`), 1021 to 1031 (`video_restore`) |
+| AUDIO | MUSIC VOLUME 8 (shown 80 %); MENU SOUNDS ON | MUSIC VOLUME 0 to 10 (each step 10 %; 0 shows OFF); MENU SOUNDS ON / OFF | 80 % and ON | `src/menu.c` lines 26 to 28, 772 to 784, 987; `src/menu_draw.c` lines 3588 to 3600 |
+| CONSOLE (VMU SCREENS) | Campaign SH-4 build: VMU 1 LOADOUT, VMU 2 CORTANA. Multiplayer ELF and host tests: VMU 1 LEADERBOARD, VMU 2 CORTANA | Per VMU screen (`vmu_screen_step`) | Back to the defaults for that build | `src/menu.c` lines 92 to 98 (`vmu_defaults`), 141 to 146 |
+| THEME | FEET FIRST (theme 0) | FEET FIRST / DOSSIER | FEET FIRST. The "asked" answer stays. | `src/menu.h` line 668; `src/menu_draw.c` line 3554; `src/menu.c` (RESTORE branch, `m->theme = 0`) |
+| MASTER CHIEF (shown only after the unlock) | First model (`MENU_FLAG_ALT_CHIEF` clear) | Steps through the chief models | First model. The unlock stays. | `src/menu.c` line 36; `src/menu.h` line 858; `src/menu_draw.c` line 3574 |
+| RESTORE ALL DEFAULTS | Action. The confirm page highlights KEEP MY SETTINGS first. | KEEP MY SETTINGS / RESTORE ALL DEFAULTS | Not applicable | `src/menu.c` lines 1506 to 1525, 2929; `src/menu_draw.c` lines 3833 to 3837 |
+| DEBUG | Dev images only, and not on a run. See 11d. | See 11d | DEBUG INFO back to OFF | `src/menu.c` lines 34 and 52 (`settings_shown`) |
+
+### 11b. VIDEO values that no preset sets
+
+Every value below is set by `video_defaults` (`src/menu.c` lines 522 to 532) and reset by `video_restore` (`src/menu.c` lines 1021 to 1031) unless the row says otherwise.
+
+| Row | Default | Steps | Source |
+|---|---|---|---|
+| SCREEN SHAPE | 4:3 (`widescreen` 0) | 4:3, 16:10, 16:9. At 768x480: 16:10 and 16:9 only. | `src/menu.c` line 523; `src/menu_draw.c` lines 851 to 855 |
+| FRAME RATE | 30 CAP (`VIDEO_FPS_CAP30` 0) | 30 CAP / UNCAPPED | `src/menu.c` lines 1021 to 1023; `src/menu_draw.c` lines 874 to 878 |
+| HUD MARGIN | MEDIUM (`HUD_MARGIN_DEFAULT` 2) | NONE, SMALL, MEDIUM, LARGE | `src/menu.h` line 374; `src/menu_draw.c` lines 879 to 881 |
+| HUD SIZE | 100 % (`hud_size` 0) | 100, 125, 150 % | `src/menu.c` line 525; `src/menu_draw.c` lines 882 to 884 |
+| FILTER | OFF | OFF, CRT (FLATSCREEN), AERIALS, REC ROOM | `src/menu.h` line 371; `src/menu_draw.c` lines 885 to 891 |
+| BRIGHTNESS | Shown 50 (step 0) | 0 to 100, 50 = neutral | `src/video_grade.h` line 11; `src/menu_draw.c` lines 868 to 870 |
+| CONTRAST | Shown 60 (step 2) | 0 to 100, 50 = neutral | `src/video_grade.h` line 12; `src/menu_draw.c` lines 871 to 873 |
+| VIGNETTE | ON | ON / OFF. Performance holds it OFF. | `src/menu.c` line 532; `src/menu_draw.c` line 1037 |
+| GRAIN | ON | ON / OFF, on every preset | `src/menu.c` line 532; `src/menu_draw.c` line 1038 |
+| AGE | 35 | OFF, then 1 to 99 (`VIDEO_AGE_MAX` 99) | `src/menu.h` line 485 (`VIDEO_AGE_DEFAULT`); `src/menu.c` line 528; `src/menu_draw.c` lines 966 to 970 |
+| WEAPON SHAKE | ON | ON / OFF | `src/menu.c` lines 34, 1027; `src/menu_draw.c` lines 916 to 919 |
+| Test-image rows (SHADERS_TEST builds only): GRASS, SNOW, WATER DEPTH TEST, FORCE DETAIL, DETAIL FADE | OFF, OFF, OFF, OFF, 70 % | Per row | `src/menu.c` line 1024 (zeroed by `video_restore`); `src/menu_draw.c` lines 976 to 996 |
+
+Rows set by a preset (not in this table): RESOLUTION, DRAW DISTANCE, OBJECT DETAIL, PARTICLES, DETAIL DISTANCE, OBJECT DISTANCE, FAR PROPS, the reflection rows, OBJECT LIGHTING, OBJECT SHADOWS, REFLECTION DISTANCE, ANTI-ALIASING, ARMOUR DETAIL, VEHICLE PARTICLES, CUTSCENE DETAIL, WATER RIPPLES, EYE ADAPT, BLOOM, GODRAYS, VIGNETTE (Performance), FIELD OF VIEW. See section 10.
+
+### 11c. What RESTORE ALL DEFAULTS resets and keeps
+
+Source: `src/menu.c` lines 1506 to 1525. The player picks KEEP or RESTORE. KEEP MY SETTINGS is highlighted first (`src/menu.c` line 2929).
+
+Resets (on RESTORE): every row in 11a except LANGUAGE; every value in 11b; the Balanced preset (`video_apply_preset`); audio; rumble; subtitles; VMU screens; the controls scheme, invert, look speed, fishing rod and every scheme's button map; the Master Chief model; the theme (FEET FIRST); DEBUG INFO.
+
+Keeps: LANGUAGE; the first-start answers (theme, filter, experience and the controls answer are not asked again); the unlocks other than the Master Chief model (what was found stays found); achievements, skulls, level progress, recordings and the other saved files. On a run (`main_mode` 2) the VIDEO values are not reset.
+
+Guide note: `docs/GAME_GUIDE.md` line 33 says the multiplayer name and armour are kept. That is a save rule, not a RESTORE rule, and is not in this table.
+
+### 11d. DEBUG rows (dev images only)
+
+Rule: DEBUG shows only on dev images and never on a run (`src/menu.c` line 52). Every debug default is the release behaviour. An untouched debug row changes nothing. `menu_init` zeroes the whole menu (`src/menu.c` line 540), so an unset debug value is 0, which is the release state. A release image clears the debug bytes on load (`menu_sanitize`, `src/menu.h` comments).
+
+| Tab | Row | Default | Saved? | Source |
+|---|---|---|---|---|
+| INFO | DEBUG INFO | OFF | Yes | `src/menu.c` line 34 |
+| INFO | LOG ON SCREEN, MEMORY LOG, KEEP NAMES | OFF (bits clear) | Yes (settings bits) | `src/menu.h` line 177 (`MENU_DBG_INFO`) |
+| INFO | UPFAILS | OFF (`debug_upfails` 0) | Yes | `src/menu.h` (`debug_upfails` comment) |
+| INFO | SERIAL LOG | The image's own default: QUIET on a release image, FULL on a PARITYTEST image | No (this session only) | `src/menu.h` (`debug_serial` comment); `src/level.c` line 270 |
+| INFO | FORCE RAM LADDER | OFF (`debug_ladder` 0) | Yes | `src/menu.h` (`debug_ladder` comment) |
+| INFO | FAR ENEMY CAP | OFF (`menu_enemy_cap` 0) | No (session only; its note says "Not saved.") | `src/menu.h` lines 198 to 213; `src/menu.c` line 221 |
+| INFO | ENEMY FADE START | 80 wu (`MENU_ENEMY_FADE_DEFAULT` 2) | No | `src/menu.h` lines 198 to 213; `src/menu.c` line 221 |
+| RENDER | DISABLE VEHICLE CARDS, DISABLE ALL CARDS | OFF (`debug_ship_cards`, `debug_all_cards` 0) | Yes | `src/menu.h` (debug comment) |
+| RENDER | GRENADE FLEE | OFF on every boot | No (`MENU_DBG_GRENADE_FLEE` is above the saved bits) | `src/menu.h` line 172 |
+| RENDER | FLASHLIGHT BEAM, CORE, EDGE, REACH, AMBER, POWER; LAMP FILL, LAMP SWEEP | Step 0 = the release look | No | `src/menu.h` (`flash_tune` comment) |
+| COMPARE | HIDE, TREES, ROCKS, BALANCED, SPHERE, PERCEPTION, BOULDER HULLS, REJECT OFF, KEEP ON | Look on (bit clear) | Yes (settings bits) | `src/menu.h` lines 177 to 183 |
+| COMPARE | CARVE START, CARVE END | 0.30 and 0.80 (release values) | UNVERIFIED | `src/menu.h` lines 193 to 194 |
+| TOOLS | TELEPORT, NEXT MAP, GOD, FREEZE, VIS, LIFT, GIVE SHIELD, GIVE CAMO, THEATRE | OFF (bits clear). The cheat rows stop achievements for the session. | Yes (settings bits) | `src/menu.h` lines 177 to 183 (`MENU_DBG_CHEAT`) |
+| TOOLS | LOOK DIAGONAL | 50 % (step 0 = the release look) | No | `src/menu.h` (`VIDEO_LOOK_DIAG_PCT`, `look_diag` comment) |
+| TOOLS | DIRECT RENDER | OFF | No | `src/menu.c` line 2757 |
+| SKULLS | GRUNT BIRTHDAY PARTY | OFF (`skull_party` 0) | No (session only) | `src/menu.h` (`skull_party` comment) |
+
+## 12. Preset rule (owner's rule, 2026-11-15)
+
+- New projects ship exactly two presets: PERFORMANCE and BALANCED. BALANCED is the default.
+- The defaults table (section 11) is the starting point for every setting.
+- Any change to a preset value updates three things in the same change: the menu note, the player guide (its Video settings preset table) and the controls doc.
 
 ## Sources
 
