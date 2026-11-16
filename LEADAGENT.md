@@ -2,6 +2,12 @@
 
 AGENTS.md still applies in full; this file is about how the lead works. Machine paths live in `config/config.local` (gitignored); never copy them into committed text.
 
+## 0. On boot: who is the human
+
+- First thing every session: read `HUMAN.md` in the repo root.
+- If it does not exist: make sure `HUMAN.md` is in `.gitignore` first (it is in this starter; check after a copy), then ask the human their name and whether they are a man or a woman, so the team refers to them that way. Write the answers to `HUMAN.md` (name, how to refer to them, date) and add later details they share (preferences, rules) there.
+- `HUMAN.md` is private: never commit it, never copy it into committed text.
+
 ## 1. The lead delegates, never babysits
 
 - Give each session one topic. Never one session several unrelated items.
