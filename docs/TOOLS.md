@@ -37,6 +37,20 @@ Source: the Halo CE Dreamcast port (dc-halo). "#NN" means a dc-halo GitHub issue
 - Keep-identical gate: a bake must not change tracked files (BSP, collision, visibility). If one changes, the build stops and names it, unless its own producer changed.
 - **A data-looking bug may be a stale bake** (reviewer session, #340 WDIAG pins, #386 bake-dependent tests). Check the bake record and the build number before you change code. A scale-of-data fix can hide a logic bug.
 
+### 1.2b Cache every slow bake (do this from day one)
+
+Rule: a bake that took minutes once never runs again unless its real input changed. Fresh clone and empty build folder included.
+
+- **Locked static bakes** (#310, chunk visibility): the slow ray-cast result (a visible-chunk set per cell, `bsp/<name>.vis`) lives in version control under `tools/assets/static_bakes/` with a manifest. Key = only the data the exporter reads (chunk order and bounds, triangle positions, opacity, recipe version), not UVs, colours, textures or scripts.
+  - Build: local file matches = reuse; missing or other bytes = restore from the store; no record (new map) = bake once, then lock it.
+  - Key moved = the build stops and prints the mismatch. Never a silent hours-long rebake, never a stale table on the disc. Refresh one BSP on purpose: `--refresh` (candidate, check, publish).
+  - Same pattern fits any slow, rarely-changing bake: lightmaps, nav meshes, impostor sheets, reflection probes.
+- **Step stamps** (1.2): skip a step whose stamp (scripts + imports, input data, settings, tool versions) is unchanged AND whose outputs still have their bytes. Default ON; `DCE_STEP_STAMPS=off` runs all, `=dry` runs all and reports would-skips to compare.
+- **Step output cache**: when a later step rewrites a pak in place, the skipped step keeps its own outputs in `assets_build/<map>/.step_cache/` and copies them back on skip. A step with no cache whose output a later step rewrites is never current: it always runs.
+- **Numba cache**: every `@njit` bake kernel uses `cache=True` so the compile (seconds per kernel per map process) is paid once per machine, not every bake.
+- **Measure before caching**: say MB of cache vs seconds saved. dc-halo left campaign audio uncached: 456 MB more cache for about 1,410 s summed per bake (maps run side by side, so less wall time).
+- Cache data never ships: the disc gets the same bytes a full rebake makes (dry-run proof: 82 would-skip steps, 0 different bytes).
+
 ### 1.3 All maps at once
 
 - Rule: bake every map in one batch, phase by phase. Do not bake one map at a time.
