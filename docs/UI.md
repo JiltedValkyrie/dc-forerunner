@@ -82,3 +82,18 @@ Rules for every video option, preset value, quality side effect and default. The
 - **Menu note rules are in section 4.** WHAT, never WHERE. One short sentence, about 60 characters (100 max). No model, map, tag, pass or engine name. No mechanism. Do not repeat the option name. Cut, never add. Check every note you touch.
 - **A default change is a visible change.** It follows section 7 (the designer's verdict, and a departure row when it departs from the source).
 - **README stays short.** It says what the project is, how to build it, and where the level editor is (if the port has one). No feature detail there; feature detail goes in `docs/GAME_GUIDE.md`.
+
+## 11. Loading screens
+
+Engine-neutral rules for any port. A port names its own files and hooks in its own docs.
+
+- **Purpose.** A loading screen says what the player waits for, and that the game is still working. It is not a place for art. A movie that plays while the disc reads is a cost the port may not be able to pay.
+- **Progress is honest.** Show the stage (what is being built) and the asset (the file being read), in plain words. No percentage bar that does not match real work. If a step has no measure, show the stage only.
+- **Redraw on a timer, not per frame.** Redraw at most every 200 ms. A message that nothing follows (a prompt waiting for the player, an error) is drawn at once.
+- **No disc read in the frame.** Read assets between frames, inside the load. Never read the disc from the draw or from the audio callback. Long reads call a tick hook so audio keeps running.
+- **Memory.** The backdrop is flat fill or one resident texture, not a movie. Keep text in one small sheet, held only while the big fill runs, then released before the fit pass. Write the sheet's size in KB in the port's budget.
+- **Text fits.** Squeeze a long line to the sheet width with a margin. Drop the far end of a path only when the squeeze would go below a set minimum. Never cut the start of a word silently.
+- **Log once per stage.** Print the free memory at each stage change (not per frame). Measure the time spent drawing the loading screen, so the load time can be split into disc time and screen time.
+- **Hooks per port.** Title line (level name or LOADING), a short note line under the bar, a hold colour for a mid-scene swap, a tick callback, and a stage hook for logs. Each port maps its own level and file names to these.
+- **Idle hardware.** While the screen waits for input, show nothing that moves faster than the eye needs. Keep the device screen (memory card or similar) on its logo if the platform has one.
+- **Sign-off.** The look (ink, bar, type) needs the designer's verdict before it lands (section 8). The cost (KB, ms) goes in the change, the same as any other visual.
