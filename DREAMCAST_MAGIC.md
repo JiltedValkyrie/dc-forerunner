@@ -19,6 +19,7 @@ Every lesson in the files below cites the Halo issue or commit it came from, giv
 | [tools/lod/README.md](tools/lod/README.md) | making far / xfar / impostor models: decimation, cards, LOD census |
 | [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | frame time, CPU budget, profiling, logging |
 | [docs/TOOLS.md](docs/TOOLS.md) | the bake pipeline, image builds, tests, collision bakes |
+| [docs/LAUNCHER_AND_EDITOR.md](docs/LAUNCHER_AND_EDITOR.md) | the launcher (six steps, one BUILD button, play modes) and the map editor (per-object choices, saved profile, departures): read before you touch the build entry point or an editor tool |
 | [docs/UI.md](docs/UI.md) | menus, HUD, text on screen, menu notes, settings and presets, look rules |
 | [docs/LORE.md](docs/LORE.md) | canon, lore sourcing, pronouns, campaign percent and what counts as proven |
 | [docs/LOADING.md](docs/LOADING.md) | load screens: the redraw rate during a load, the stage line, the text sheet's VRAM hold, what a load must never do |
