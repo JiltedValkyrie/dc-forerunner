@@ -41,6 +41,12 @@ Source: the Halo CE Dreamcast port (private repo "dc-halo"). "#NN" means a dc-ha
 - Disc reads: KOS gives stdio a 512-byte buffer on ISO9660. Every 2 KB sector then became its own one-sector GD-ROM command. The fix (unbuffered reads, sector-aligned direct reads, bounce buffer for the rest) was coded on 2026-10-22 (dc-halo PERF_NOTES entry "Disc reads unbuffered"); no gain is claimed until a boot log.
   - Rule: a loader reads whole sectors in large chunks. Test the read count per load, not only the time.
 - Build flags: KOS was rebuilt once with `-DNDEBUG -DDBGLOG_DISABLED` so KOS asserts and debug logs go quiet. Game printf stays. Back up the KOS environ file before editing it.
+- Full flag set (what dc-halo ships; the Makefile checks it):
+  - KOS (environ.sh, KOS rebuilt once with them): `-DNDEBUG -DDBGLOG_DISABLED -O2 -fomit-frame-pointer -fno-PIC -fno-PIE`, ABI `-m4-single -ml -mfsrra -mfsca -ffunction-sections -fdata-sections`, link `-Wl,--gc-sections`.
+  - Game math (every file): `-ffast-math -ffp-contract=fast -mfsrra -mfsca -fno-math-errno` + SH4ZAM headers. With `-ffast-math` a NaN check like `v == v` or `!(x >= 0)` folds away: use a bit-test `finite_f32`.
+  - Never `-m4-single-only`: environ.sh falls back to it silently when sh-elf-gcc cannot start (MinGW DLLs not on PATH). Slower, and it hid a compiler crash. The Makefile refuses it.
+  - Per file, after an A/B on hardware: hot per-frame files (collision, skinning, mesh draw, particles) in `HOT_O3` (`-O3`); cold files (save, settings, menu state, loaders) in `COLD_OS` (`-Os`) to pay for the -O3 text. Never raise the default for everything.
+  - Not on: `-flto` (tried in KOS environ, left off), `-fstack-protector`.
 - Review rule (owner order, 2026-11-11): every review names the KOS path used, or says why not with a number. No line = not PASS.
 
 ## 3. SH4ZAM for all math

@@ -4,6 +4,14 @@
 ifndef KOS_BASE
 $(error KOS_BASE not set. Use tools/build.ps1)
 endif
+# ABI guard: environ.sh silently falls back to -m4-single-only when sh-elf-gcc cannot run at source time (MinGW DLLs not on PATH). That build is slower and hid a compiler crash in dc-halo. Refuse it.
+ifneq ($(findstring -m4-single-only,$(KOS_CFLAGS)),)
+$(error KOS_CFLAGS has -m4-single-only, not the image ABI -m4-single: put MinGW bin and KOS_CC_BASE/bin on PATH before sourcing environ.sh)
+endif
+# Release KOS: environ.sh should add -DNDEBUG -DDBGLOG_DISABLED (KOS asserts and debug log off) and rebuild KOS once with them (docs/PERFORMANCE.md).
+ifeq ($(findstring -DNDEBUG,$(KOS_CFLAGS)),)
+$(warning KOS_CFLAGS lacks -DNDEBUG -DDBGLOG_DISABLED: KOS asserts and debug log stay on, slower image. See docs/PERFORMANCE.md)
+endif
 PROJECT ?= port
 SH4ZAM    ?= third_party/sh4zam
 SH4DER    ?= third_party/sh4der-pvr
@@ -14,7 +22,20 @@ MATHFLAGS = -I$(SH4ZAM)/include -ffast-math -ffp-contract=fast -mfsrra -mfsca -f
 USE_SH4DOW ?= 0
 USE_SH4DER ?= 0
 LIBS = $(SH4ZAM_LIB)
-CFLAGS_ALL = -O2 -Wall -Wextra $(MATHFLAGS)
+# kos-cc already adds KOS_CFLAGS: -O2 -fomit-frame-pointer -m4-single -ml -mfsrra -mfsca -ffunction-sections -fdata-sections (link --gc-sections).
+# OPTFLAGS is the game default; per-file EXTRA_CFLAGS come after it, so they win.
+OPTFLAGS ?= -O2
+CFLAGS_ALL = $(OPTFLAGS) -Wall -Wextra $(MATHFLAGS) $(EXTRA_CFLAGS)
+# HOT_O3: hot per-frame files (collision, skinning, mesh draw, particles) at -O3, after an A/B on hardware (dc-halo: collision -O3 +18 KB text, real ms win).
+# COLD_OS: cold files (save, settings, menu state, loaders) at -Os to pay for the -O3 text. Add files here, never change OPTFLAGS for everything.
+HOT_O3  ?=
+COLD_OS ?=
+ifneq ($(strip $(HOT_O3)),)
+$(HOT_O3): EXTRA_CFLAGS += -O3
+endif
+ifneq ($(strip $(COLD_OS)),)
+$(COLD_OS): EXTRA_CFLAGS += -Os
+endif
 ifeq ($(USE_SH4DOW),1)
 CFLAGS_ALL += -I$(SH4DOW)/include
 SH4DOW_SRCS = $(wildcard $(SH4DOW)/src/*.c)
