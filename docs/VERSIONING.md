@@ -24,7 +24,7 @@ Counts:
 Does not count:
 - departures from the original (features the original did not have), unless they sit inside a counted level;
 - side modes, menus, options, editor, extras, debug tools, launcher, tests and docs. dc-halo's version rule names FIREFIGHT, OUTPOST, menus, editor, extras and tools as adding nothing (`AGENTS.md`, "Version and image");
-- code that is coded but not booted. Counts 0. Halo's log rows from 2026-11 count it 0 (`docs/archive/campaign/CAMPAIGN_PERCENT.md`). Halo's first version rule (2026-10-26) gave coded work half weight. That rule is superseded in practice.
+- code that is coded but not booted. Counts 0. Halo's log rows from 2026-11 count it 0 (`docs/archive/campaign/CAMPAIGN_PERCENT.md`). Halo's first version rule (2026-10-26) gave coded work half weight. Superseded: Parity ruling 2026-11-15 (owner gave Parity the call): only booted-and-proven work moves the percent.
 - an unreached finale or credits. Held as unpaid until someone reaches them (Halo `CAMPAIGN_PERCENT.md`, row 2026-11-15).
 
 The percent never goes down.
@@ -38,10 +38,10 @@ The percent never goes down.
   - A reason names the levels beaten, the original hooks wired and the cinematics played.
 - Lead logs both answers and the call in `docs/archive/campaign/CAMPAIGN_PERCENT.md`, one row per commit: date, commit, Scholar %, Parity %, Lead call, version.
 - **Lead's call** is the average of the two answers, as a whole percent. It never goes below the last logged value.
-  - Halo's rows mostly round up (for example 76.5 became 77 on 2026-11-09). Write the rounding and the reason in the row.
+  - Round DOWN (owner ruling 2026-11-15). Older Halo rows rounded ad hoc (76.5 became 77 on 2026-11-09).
   - Halo took the lower of the two answers until 2026-11-05. After that the owner ordered the average.
   - The owner's boot result can move the call above the average. Halo's 2026-11-07 row called 63 over a 62 / 62 average, on the owner's word that the first beatable level was campaign progress. Log the reason.
-- Cadence: dc-halo `AGENTS.md` says "every commit"; dc-halo `docs/VERSIONING.md` says "every build". **Plan:** ask at every commit that could move the number, and at least at every image.
+- Cadence and rounding: Owner ruling 2026-11-15: ask Scholar AND Parity at every IMAGE BUILD (not every commit); Lead's call = their average ROUNDED DOWN, never below the last logged value.
 
 ## 4. Build number
 
@@ -111,15 +111,14 @@ From dc-halo `docs/archive/campaign/CAMPAIGN_PERCENT.md`, the 2026-11-15 row for
 7. Refuse a tester image from a tree with uncommitted tracked changes.
 8. Use one function for the version string. Use it on the title screen, the log and the launcher. Add the second-mode label if there is one.
 9. Name test images with a suffix that is always last. Refuse to write over an existing image.
-10. Put the percent rule in the team's lead notes too: Lead alone edits the version, every commit asks for the percent, percent never lowers, only booted work counts.
+10. Put the percent rule in the team's lead notes too: Lead alone edits the version, every image build asks for the percent, percent never lowers, only booted work counts.
 11. Add a test that no local paths or user names are committed (dc-halo `tests/test_no_local_paths.py`), and a test that every BUILDS row matches a real version.
 12. Link this file from the root `DREAMCAST_MAGIC.md` table.
 
 ## 10. Open points (not settled in dc-halo)
 
 - What happens to the percent when a counted level breaks in a later build. dc-halo's docs do not say. **Unverified.** Decide and log it.
-- Cadence: every commit (`AGENTS.md`) or every build (`docs/VERSIONING.md`). This file says both: at every commit that could move the number, and at least at every image.
-- dc-halo's log rows show "average rounded up" most of the time. The rounding rule is Lead's call, not a fixed formula.
+- Cadence and rounding: settled 2026-11-15 (every image build, rounded down).
 
 ## Source files (dc-halo)
 
