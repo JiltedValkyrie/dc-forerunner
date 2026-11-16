@@ -167,6 +167,55 @@ Main dc-halo sources: its audio notes (tiers, residency, permanent cuts), its bu
 7. Gain applied twice (#258). It was found by ear on one build.
 8. Voice rate fallbacks (#130). Each map needed its own voice-block check.
 
+## 14. Quality tiers, hero sounds and residency (BINDING, owner rulings carried from dc-halo 2026-11-16)
+
+Sections 7 to 9 are Halo history. This section is the rule set for this port. Change it only via Lead, after a boot proves it wrong. dc-halo sources: `docs/archive/audio/AUDIO_TIERS.md` (Lead ruling 2026-10-31), `docs/archive/audio/AUDIO_RESIDENCY.md`, `tools/audio/sfx_tiers.json`.
+
+### 14.1 Quality by image
+
+- Emulator, GDemu, single image: FULL quality. Retail rate, no size cut. Disc size is no reason to cut.
+- CD-R (`gdrom` profile) only: size cuts (mono music, lower music rate, lower voice rate), each one written to the build doc with its MB. The bake records the profile; tools refuse a mixed bake.
+- Memory and speed cuts (AICA RAM, main RAM, CPU) apply in EVERY image. Those are the only cuts the full-quality images take.
+
+### 14.2 Hero sounds: never reduced
+
+Hero = the player hears it every second or it carries the story. Retail rate, every distinct sound kept, never dropped for room:
+- Music (streamed, retail rate; mono only on CD-R).
+- Story dialogue and cutscene voice (streamed).
+- HUD / UI feedback and warnings.
+- The player's own weapons, powers / abilities, grenades, reload / empty.
+- Player footsteps (1 permutation in gameplay is enough).
+- Engines and guns of a vehicle the player drives.
+- Doors, lifts and machines of the current area, pickups.
+
+### 14.3 Tier order for AICA residency (gameplay; cutscenes keep their own budget)
+
+| Tier | What | When short |
+|---|---|---|
+| T1 core | hero sounds of 14.2 that live in AICA | never cut |
+| T2 involuntary | enemy pain, death, scream (distinct clips) | never cut |
+| T3 ambient | ambient beds (streamed on a free voice stream) and ambient detail one-shots | re-encode lower first, drop last; no silent moments |
+| Variety | 2nd+ permutations, responses first; floor 1 permutation + random pitch per play | cut before ambient |
+| T4 chatter | ally / enemy barks, group comms, shouting | refused first |
+
+Cut order when short: rate steps of non-hero classes, heavy-tag permutations (keep first 3 of impact / fire classes), response variety, melee permutations, ambient detail, chatter. Every distinct sound stays playable; only copies and rate steps go. Enemy voices that carry gameplay information count as core for that area (Lead ruling per area, logged).
+
+### 14.4 Quality ladder (non-hero sound effects)
+
+- Three rates per class: S = retail rate, A = 1.5 x the floor (her "+50 %" floor), B = floor. Every class starts at B.
+- A data table (`sfx_tiers.json` pattern) lists upgrade steps, most valuable first: `[class, tier]`. The bake takes each step in order and keeps it when the area's resident total (core + loops + voices + the step) still fits the AICA budget minus a margin (dc-halo 96 KB); else skips it. Result written per area (`sfx_quality.json`), read by the converter.
+- Order of steps: weapon fire, footsteps, damage taken, explosions, reload / ready, impacts, game events, doors to A; then the same top classes to S.
+- Rates are fixed at bake time. No per-boot tweak.
+
+### 14.5 Residency: load near the trigger, leave after
+
+- No disc read for a sound while it plays (one-shots read only at a load or prefetch point).
+- Stays resident whole area: weapons, impacts, footsteps, HUD, loops (ambient, vehicle, machines: a loop restarts when the player comes back), doors / machines, anything a checkpoint revert can re-arm.
+- Phased (one-shot groups): encounter voices while their actors live or are about to spawn; scripted effects with a once-only trigger; device sounds used in one sub-area (cheapest win: phase by area, not by trigger).
+- Budget by the worst SIMULTANEOUS set, not the whole-area union. The ladder (14.4) then buys back rate steps.
+- A block loads whole or fails with one named row: `SFX block <name> (<n> clips) NOT loaded: no AICA room for <KB> | no RAM | read failed | not contiguous`.
+- Every sound named in a weapon / power / HUD table must be in a group; the build fails if not (Halo's silent guns).
+
 ## Title music pattern (generic)
 
 A title track is a streamed ADPCM file read from disc. It is never resident.
