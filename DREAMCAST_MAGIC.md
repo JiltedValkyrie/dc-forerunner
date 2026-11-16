@@ -26,6 +26,7 @@ Every lesson in the files below cites the Halo issue or commit it came from, giv
 | [docs/ACHIEVEMENTS.md](docs/ACHIEVEMENTS.md) | achievement toast, fanfare, achievements page and save file: the look and layout that stay the same across projects |
 | [docs/MENUS.md](docs/MENUS.md) | settings and debug menu layout as a template: pages, row types, presets, menu note rules, translation keys, the debug gate |
 | [docs/LOD.md](docs/LOD.md) | level of detail: tiers, the 6,000-triangle screen budget, switch distances, fades, impostors and the census rule |
+| [docs/VERSIONING.md](docs/VERSIONING.md) | the version number (campaign percent), the build number, image names and the title-screen string, who sets them and when |
 
 ## The thirteen rules that cost us the most to learn
 
