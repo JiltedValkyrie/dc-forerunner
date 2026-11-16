@@ -21,6 +21,10 @@ Every lesson in the files below cites the Halo issue or commit it came from, giv
 | [docs/TOOLS.md](docs/TOOLS.md) | the bake pipeline, image builds, tests, collision bakes |
 | [docs/UI.md](docs/UI.md) | menus, HUD, text on screen, menu notes, settings and presets, look rules |
 | [docs/LORE.md](docs/LORE.md) | canon, lore sourcing, pronouns, campaign percent and what counts as proven |
+| [docs/LOADING.md](docs/LOADING.md) | load screens: the redraw rate during a load, the stage line, the text sheet's VRAM hold, what a load must never do |
+| [docs/ACHIEVEMENTS.md](docs/ACHIEVEMENTS.md) | achievement toast, fanfare, achievements page and save file: the look and layout that stay the same across projects |
+| [docs/MENUS.md](docs/MENUS.md) | settings and debug menu layout as a template: pages, row types, presets, menu note rules, translation keys, the debug gate |
+| [docs/LOD.md](docs/LOD.md) | level of detail: tiers, the 6,000-triangle screen budget, switch distances, fades, impostors and the census rule |
 
 ## The thirteen rules that cost us the most to learn
 
