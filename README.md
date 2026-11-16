@@ -1,4 +1,4 @@
-# dc-newproject
+# dc-forerunner
 
 A project-agnostic starter for porting a game to the Sega Dreamcast. It is the skeleton of the Halo Dreamcast port's workflow: rules for the team, the lessons that cost the most to learn, the build chain (KallistiOS, SH4ZAM, disc image), and tools for LOD and assets.
 
