@@ -64,6 +64,18 @@ Every review say RAM, VRAM, audio-chip cost in numbers (KB). Send BACK if: resid
 - No per-frame printf without once-guard or cap (serial 115200 baud: 1 KB = 94 ms).
 - Test/build workers hidden: stdout/stderr to own log, no console, no error popup.
 
+## Audio rates (HARD, owner 2026-11-16: same as dc-halo)
+
+All AICA ADPCM 4-bit, converted from the owner's disc at build. Full rule set: [docs/AUDIO.md](docs/AUDIO.md) section 14 (BINDING).
+
+- Ambient loop (AICA resident): 11,025 Hz mono; long loop lower (rate = loop max / seconds, floor 7,350 Hz); crossfade loop seam.
+- Non-hero SFX + creature vocals: floor B 11,025 Hz mono; ladder A 16,538 Hz, S 22,050 Hz / retail, bought back per area while AICA fits (8 kHz vocals only on a tight area, tracker row).
+- Dialogue: 22,050 Hz mono (retail), streamed from disc, never resident.
+- Cutscene voice: 44,100 Hz mono (L+R downmix), streamed.
+- Music: retail rate, streamed. 22,050 Hz / mono only in the CD-R profile.
+- Ambience runtime: area background + 2 nearest loops, max 6 loop voices + pooled streams. AICA tight: lower rate first, drop sound last. Must-have sounds leave >= 64 KB AICA free.
+- Higher than the table = DEPARTURE row + reason. Say AICA KB per area in every review.
+
 ## Version and image
 
 - `src/version.h` = progress percent, 2 digits (`v0.05` = 5 %). Only Lead change it.
