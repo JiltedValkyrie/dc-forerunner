@@ -47,7 +47,7 @@ SH4DER_SRCS = $(wildcard $(SH4DER)/src/*.c)
 LIBS += build/libsh4der_pvr.a
 endif
 TARGET = build/$(PROJECT).elf
-OBJS = build/main.o
+OBJS = build/main.o build/fastmesh.o
 all: $(TARGET)
 build/%.o: src/%.c
 	@mkdir -p build

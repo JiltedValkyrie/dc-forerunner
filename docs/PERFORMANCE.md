@@ -104,6 +104,17 @@ Source: the Halo CE Dreamcast port (private repo "dc-halo"). "#NN" means a dc-ha
 - #337: cutscenes ignored automatic LOD and ran at 15 fps with nothing lowered. Rule: cutscene paths go through the same LOD choice as gameplay.
 - Tip: a far mesh with the same 1,000 triangles everywhere wastes the budget. Cut the far tier first.
 
+## 7b. Mesh draw: skip early, prefetch, fewer branches
+
+Code: [src/fastmesh.c](../src/fastmesh.c) / [src/fastmesh.h](../src/fastmesh.h) (MIT, built by the Makefile, linked only if you call it). On a CPU-bound port these three together took the heaviest interior view from 27-43 ms to 12-19 ms a frame (about 2x), with the PVR packet stream byte-identical before and after.
+
+1. **Skip early (lazy transform).** Before transforming, walk the triangles in model space (eye moved into model space once per draw: `fm_eye_in_model`). A triangle clearly facing away (`(A - eye) . normal > 0`, with a 1e-2 cosine margin and a sliver guard) is marked; a vertex used only by such triangles is never transformed (`fm_face_mark`). Your triangle pass culls any triangle touching an `FM_SKIP` vertex. About half of a closed mesh faces away, so about half the vertex transforms go. Static meshes only (a skinned pose moves vertices after the test). Two-sided materials: skip the pre-pass (`keep = NULL`).
+   - Why the margin: near edge-on, the screen-space backface sign is float noise at large world coordinates. The pre-pass must never cull a triangle the screen test would keep; with 1e-2 it never did over hundreds of thousands of draws, with 1e-3 a few differed.
+2. **Prefetch every vertex.** `SHZ_PREFETCH` about 150-200 B ahead in the source stream (8 vertices at 24 B), on every vertex. One prefetch per 8 vertices left most cache lines cold. Write each 32 B output record after `shz_dcache_alloc_line`, so the store does not first read the line from RAM.
+3. **Fewer branches (loop unswitch).** A per-vertex flag test that is the same for the whole mesh (lazy or not, skinned or not) goes out of the loop: write the body once as an `always_inline` helper taking the flag, call it with a constant in each branch. The compiler emits one tight copy per case.
+
+How to prove it safe: a differential harness that draws random poses and cameras with the trick on and off and compares the submitted PVR packets byte for byte. Keep the harness; rerun it on every change to the draw.
+
 ## 8. Profiling tools
 
 - VERBOSE panel (Halo): Frame, Pie, Memory, KOS and a BSP view. The BSP view has a LAST SLOW block that names the part and the heap, uploads and packs of that frame. A `SLOW` serial line marks the same frame.

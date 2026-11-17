@@ -11,6 +11,7 @@ Nothing here is a game. No game assets are in this repository; the build convert
 - `DREAMCAST_MAGIC.md`: the lessons, with the doc file for each area.
 - `docs/`: the lesson docs (generic), the tracker template (`docs/plans/FEATURE_GAPS.md`), the roadmap hub and the executive-action log.
 - `src/main.c`, `Makefile`: a title screen skeleton (a still and streamed music) that builds with KOS and links SH4ZAM.
+- `src/fastmesh.c`: mesh draw speed-ups (skip back faces before transform, prefetch, loop unswitch), see `docs/PERFORMANCE.md` 7b.
 - `tools/`: fresh dependency fetch, config reader, asset step example, build script, LOD tools.
 
 ## Start a new port from it
